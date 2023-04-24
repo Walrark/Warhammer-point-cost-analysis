@@ -12,7 +12,6 @@ import numpy as np
 
 #maybe i can plot average damage vs smlt(space marine like target) against point cost
 
-#Weapons
 Example_weapon = {'Points': 10,
                   'R':12,
                   'Type':'Pistol',
@@ -20,8 +19,80 @@ Example_weapon = {'Points': 10,
                   'AP':4,
                   'D(rand)':6,
                   'D(con)':2,
-                  'A':1,
+                  'A(rand)': 6,
+                  'A(con)': 0,
                   'AB':'None'}
+
+
+#Weapons
+#some problems with how im currently doing the weapons
+#1: different weapon profiles
+#Option 2 (probably better version)
+Sunburst = {'Points': 20,
+                  'R':48,
+                  'Type':'Heavy',
+                  'STR':4,
+                  'AP':1,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(rand)': 6,
+                  'A(con)': 0,
+                  'AB':'Blast'}
+Starshot = {'Points': 20,
+                  'R':48,
+                  'Type':'Heavy',
+                  'STR':8,
+                  'AP':2,
+                  'D(rand)':6,
+                  'D(con)':0,
+                  'A(rand)': 0,
+                  'A(con)': 1,
+                  'AB':'None'}
+Aeldari_Missle_Launcher = [Sunburst,Starshot]
+
+#2: melee weapons
+#option 1:
+Example_melee1 = {'Points': 10,
+                  'R':0,
+                  'Type':'Melee',
+                  'STR':2,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':2,
+                  'A(rand)': 0,
+                  'A(con)': 1,
+                  'AB':'None'}
+#option 2:
+Example_melee2 = {'Points': 10,
+                  'Type':'Melee',
+                  'STR':2,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':0,
+                  'A(rand)': 0,
+                  'A(con)': 1,
+                  'AB':'None'}
+# if I use range=0 in my melee weapons I can consider them the same as ranged weapons
+#otherwise I have to check if the weapon has type melee or not
+
+#3: In order to accurately construct a value for each unit I need them to have their weapon profiles
+#I think the only way to do that properly is to do the following
+
+Example_Unit_With_Weapons = {'Points': 10,
+                  'M':6,
+                  'WS':4/6,
+                  'BS':4/6,
+                  'STR':3,
+                  'T':3,
+                  'W':1,
+                  'A':1,
+                  'LD':8,
+                  'SV':2/6,
+                  'Weapon':[Example_melee2,Example_weapon]}
+#then I have 2 questions about this style
+#1: how does this affect how I calculate my values
+#- should I have a list based on the weapons for each member in each unit?
+
 
 Fusion_Pistol = {'Points': 10,
                   'R':6,
@@ -30,7 +101,8 @@ Fusion_Pistol = {'Points': 10,
                   'AP':4,
                   'D(rand)':6,
                   'D(con)':2,
-                  'A':1,
+                  'A(con)':1,
+                  'A(rand)':0,
                   'AB':'None'}
 
 Shuriken_Rifle = {'Points': 0,
@@ -40,7 +112,8 @@ Shuriken_Rifle = {'Points': 0,
                   'AP':1,
                   'D(rand)':0,
                   'D(con)':1,
-                  'A':1,
+                  'A(con)':1,
+                  'A(rand)':0,
                   'AB':'Shuriken'}
 
 Shuriken_Cannon = {'Points': 10,
@@ -50,7 +123,8 @@ Shuriken_Cannon = {'Points': 10,
                   'AP':1,
                   'D(rand)':0,
                   'D(con)':2,
-                  'A':3,
+                  'A(con)':3,
+                  'A(rand)':0,
                   'AB':'Shuriken'}
 
 Wraithcannon = {'Points': 15,
@@ -60,7 +134,8 @@ Wraithcannon = {'Points': 15,
                   'AP':4,
                   'D(rand)':3,
                   'D(con)':3,
-                  'A':1,
+                  'A(con)':1,
+                  'A(rand)':0,
                   'AB':'None'}
 
 Eldar_Weapons =[Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcannon]
@@ -184,10 +259,14 @@ way_seeker = {
 
 
 #units
-Corsair_Voidscarred = [corsair_voidscarred,voidscarred_felarch,shade_runner,soul_weaver,way_seeker]
-Autarch = [autarch]
-WraithLord = [wraithlord]
-Guardian_Defenders =[Guardian_Defender,Heavy_Weapon_Platfrom]
+Corsair_Voidscarred = {'Name': 'Corsair_Voidscarred',
+    'Member':[corsair_voidscarred,voidscarred_felarch,shade_runner,soul_weaver,way_seeker]}
+Autarch = {'Name': 'Autarch',
+    'Member':[autarch]}
+WraithLord = {'Name': 'WraithLord',
+    'Member':[wraithlord]}
+Guardian_Defenders ={'Name': 'Guardian_Defenders',
+    'Member':[Guardian_Defender,Heavy_Weapon_Platfrom]}
 #army
 Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred]
 
@@ -196,24 +275,29 @@ Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred]
 #if 3 A and WS = 3/6 then 1.5 hits
 
 
-#with new data type we should be able to simplify a lot of our functions
-#want a function which takes the army list and hands off the units to another function which
-#hands off to another function to use the weights for each unit
 
 def army_list_value(army):
     #this function takes an army list and returns a list by highest point to cost ratio to the lowest
     z = np.zeros((len(army),5))
+
     for i in range(0,len(army)):
        z[i] = unit_handle(army[i])
-    return z
+    return np.block([list_array_transpose(army),z])
+
+def list_array_transpose(army):
+    new_list = []
+    for i in range(len(army)):
+        new_list.append('{}'.format(army[i]['Name']))
+    return np.array([new_list]).T
 
 
 def unit_handle(unit):
     #this function take the unit given from the army and returns a list of the point to cost ratio of each member
     z = np.zeros(5)
-    for i in range(0,len(unit)):
-        z[i] =  member_value(unit[i])
+    for i in range(0,len(unit['Member'])):
+        z[i] =  member_value(unit['Member'][i])
     return  z
+
 
 #'Points','M','WS','BS','STR','T','W','A','LD','SV'
 
@@ -227,25 +311,24 @@ def member_value(member):
     + w_cost(member)
     + a_cost(member)
     + ld_cost(member)
-    + sv_cost(member))/member['Points'])
+    + sv_cost(member))/(2*member['Points']))
     return x
 
 def m_cost(val):
     #given a move value returns a weighted value
     x = val['M']
-    w = 2
-    return w * x
+    w = (val['T']*val['W'])+(6*val['WS']+val['A']+val['STR'])/3
+    return (w + x)/2
 
 def ws_cost(val):
     #given a ws value returns a weighted value
     x = val['WS']
     w = (val['STR'] * 0.8 + x * val['A'])/2
-    print(w)
     return x * w
 
 def bs_cost(val):
     #given a bs value returns a weighted value
-    #This value depends on the ranged weapon but this app. doesn't include weapons
+    #This value depends on the ranged weapon but this app doesn't include weapons (yet)
     x = val['BS']
     w = 18
     return x * w
@@ -269,13 +352,11 @@ def t_cost(val):
 #print(t_cost(Heavy_Weapon_Platfrom))
 #print(t_cost(wraithlord))
 
-
-
 def w_cost(val):
     #given a w value returns a weighted value
     x = val['W']
     w = val['T']
-    return (x * w)/2
+    return (x * w)/3
 
 def a_cost(val):
     #given a a value returns a weighted value
@@ -294,6 +375,7 @@ def sv_cost(val):
     w = val['W']
     return x * w
 
-print(unit_handle(WraithLord))
-print(unit_handle(Guardian_Defenders))
+
 print(army_list_value(Eldar))
+
+
