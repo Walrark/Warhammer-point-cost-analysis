@@ -51,17 +51,7 @@ Starshot = {'Points': 20,
 Aeldari_Missle_Launcher = [Sunburst,Starshot]
 
 #2: melee weapons
-#option 1:
-Example_melee1 = {'Points': 10,
-                  'R':0,
-                  'Type':'Melee',
-                  'STR':2,
-                  'AP':4,
-                  'D(rand)':6,
-                  'D(con)':2,
-                  'A(rand)': 0,
-                  'A(con)': 1,
-                  'AB':'None'}
+
 #option 2:
 Example_melee2 = {'Points': 10,
                   'Type':'Melee',
@@ -74,6 +64,8 @@ Example_melee2 = {'Points': 10,
                   'AB':'None'}
 # if I use range=0 in my melee weapons I can consider them the same as ranged weapons
 #otherwise I have to check if the weapon has type melee or not
+
+#I think I will have to check the type either way to use it for weapon skill instead of ballistic skill
 
 #3: In order to accurately construct a value for each unit I need them to have their weapon profiles
 #I think the only way to do that properly is to do the following
@@ -93,6 +85,59 @@ Example_Unit_With_Weapons = {'Points': 10,
 #1: how does this affect how I calculate my values
 #- should I have a list based on the weapons for each member in each unit?
 
+
+Power_Glaive = {'Points': 0,
+                  'Type':'Melee',
+                  'STR':2,
+                  'AP':2,
+                  'D(rand)':0,
+                  'D(con)':2,
+                  'A(rand)': 0,
+                  'A(con)': 0,
+                  'AB':'None'}
+
+Diresword = {'Points': 0,
+                  'Type':'Melee',
+                  'STR':1,
+                  'AP':0,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(rand)': 0,
+                  'A(con)': 0,
+                  'AB':'*'}
+
+Shuriken_Pistol = {'Points': 0,
+                  'R':12,
+                  'Type':'Pistol',
+                  'STR':4,
+                  'AP':1,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(rand)': 0,
+                  'A(con)': 1,
+                  'AB':'Shuriken'}
+
+Avenger_Shuriken_Catapult = {'Points': 0,
+                  'R': 18,
+                  'Type':'Assault',
+                  'STR':4,
+                  'AP':2,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(rand)': 0,
+                  'A(con)': 3,
+                  'AB':'Shuriken'}
+
+Plasma_Grenade = {'Points': 0,
+                  'R':6,
+                  'Type':'Grenade',
+                  'STR':4,
+                  'AP':1,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(rand)': 6,
+                  'A(con)': 0,
+                  'AB':'Blast'}
 
 Fusion_Pistol = {'Points': 10,
                   'R':6,
@@ -138,7 +183,12 @@ Wraithcannon = {'Points': 15,
                   'A(rand)':0,
                   'AB':'None'}
 
-Eldar_Weapons =[Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcannon]
+
+
+
+Eldar_Melee_Weapons = [Diresword,Power_Glaive]
+Eldar_Ranged_Weapons = [Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcannon,Avenger_Shuriken_Catapult,Shuriken_Pistol,Plasma_Grenade,Aeldari_Missle_Launcher]
+
 #members
 Example_member = {'Points': 10,
                   'M':6,
@@ -257,6 +307,29 @@ way_seeker = {
     'LD': 8,
     'SV': 3/6}
 
+dire_avenger = {'Points': 13,
+                  'M':7,
+                  'WS':4/6,
+                  'BS':4/6,
+                  'STR':3,
+                  'T':3,
+                  'W':1,
+                  'A':2,
+                  'LD':8,
+                  'SV':3/6,
+                  'Weapon':[Avenger_Shuriken_Catapult,Plasma_Grenade]}
+
+dire_avenger_exarch = {'Points': 10,
+                  'M':7,
+                  'WS':4/6,
+                  'BS':4/6,
+                  'STR':3,
+                  'T':3,
+                  'W':2,
+                  'A':3,
+                  'LD':8,
+                  'SV':3/6,
+                  'Weapon':[Shuriken_Pistol,Avenger_Shuriken_Catapult,Diresword,Power_Glaive,Plasma_Grenade]}
 
 #units
 Corsair_Voidscarred = {'Name': 'Corsair_Voidscarred',
@@ -267,15 +340,107 @@ WraithLord = {'Name': 'WraithLord',
     'Member':[wraithlord]}
 Guardian_Defenders ={'Name': 'Guardian_Defenders',
     'Member':[Guardian_Defender,Heavy_Weapon_Platfrom]}
+Dire_Avengers = {'Name': 'Dire_Avengers',
+    'Member':[dire_avenger,dire_avenger_exarch]}
+
 #army
-Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred]
+Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred,Dire_Avengers]
 
 #notes for me:
 #if T=2*STR for an attack then 1/6 if T>S => 2/6 if T=S => 3/6 if T<S => 4/6 if 2T=S => 5/6
 #if 3 A and WS = 3/6 then 1.5 hits
 
+#This section will be for the function which gives insight into the weapons of each unit
 
 
+#doesnt handle multi profile weapons (yet)
+def Weapon_Value(lst):
+    #Want this function to evaluate ranged weapons (melee needs unit STR)
+    #Take a list of weapons and gives back an array of doubles which gives
+    #(average chance to wound spacemarine, average damage to spacemarine)
+    NA = np.array([])
+    for i in range(0,len(lst)):
+        NA = make_double(lst[i])
+    return NA
+
+def make_double(weap):
+    #take a weapon, gives back a double:(average chance to wound spacemarine, average damage to spacemarine)
+    if weap['Type'] == 'Melee':
+        return None
+    else:
+        i = Chance_To_Wound(weap)
+        j = Avg_Damage(weap)
+        return (i,j)
+
+def Chance_To_Wound(weap):
+    #give the chance to wound (after hitting) with the average number of attacks (if there's a random attack char.)
+    T=4
+    W=2
+    SV=4/6
+    S = weap['STR']
+    AP = weap['AP']
+    Ac = weap['A(con)']
+    Ar = weap['A(rand)']
+    if Ar == 0:
+        AR = 0
+    else:
+        AR = ((Ar/2)+(Ar/2)+1)/2
+    A = Ac + AR
+    if  SV - (AP/6)<0:
+        MSV = 0
+    else:
+        MSV = SV - (AP/6)
+    if (2*S)<=T:
+        x = A*((1/6) * (1 - MSV))
+    elif S<T:
+        x = A*((2/6) * (1 - MSV))
+    elif S==T:
+        x = A*((3 / 6) * (1 - MSV))
+    elif S>=2*T:
+        x = A*((5 / 6) * (1 - MSV))
+    elif S>T:
+        x = A*((4 / 6) * (1 - MSV))
+    return x
+
+
+#print(Chance_To_Wound(Shuriken_Cannon))
+#print(Chance_To_Wound(Fusion_Pistol))
+#Sunburst = {'Points': 20,
+#                  'R':48,
+#                  'Type':'Heavy',
+#                  'STR':4,
+#                  'AP':1,
+#                  'D(rand)':0,
+#                  'D(con)':1,
+#                  'A(rand)': 6,
+#                  'A(con)': 0,
+#                  'AB':'Blast'}
+
+
+def Avg_Damage(weap):
+    Dr = weap['D(rand)']
+    Dc = weap['D(con)']
+    Ac = weap['A(con)']
+    Ar = weap['A(rand)']
+    if Ar == 0:
+        AR = 0
+    else:
+        AR = ((Ar / 2) + (Ar / 2) + 1) / 2
+    A = Ac + AR
+    if Dr == 0:
+        DR = 0
+    else:
+        DR = ((Dr / 2) + (Dr / 2) + 1) / 2
+    x = A*(Dc+DR)
+    return x
+
+#print(Avg_Damage(Fusion_Pistol))
+#print(Avg_Damage(Shuriken_Cannon))
+
+
+print(Weapon_Value(Eldar_Ranged_Weapons))
+
+#This is the function for evaluating units in an army
 def army_list_value(army):
     #this function takes an army list and returns a list by highest point to cost ratio to the lowest
     z = np.zeros((len(army),5))
