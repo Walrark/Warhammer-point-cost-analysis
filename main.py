@@ -1,7 +1,7 @@
 # What I want to do is take the information off of wahapedia to make a system which
 # ranks units by their stat/cost ratio with a weight given by some arbitrary value
 import numpy as np
-
+import matplotlib.pyplot as plt
 # What do I need to do this?
 # creat data sheets as a dictionary
 # assign weight values to stats (ideally by a probability)
@@ -183,11 +183,95 @@ Wraithcannon = {'Points': 15,
                   'A(rand)':0,
                   'AB':'None'}
 
+Aeldari_Flamer= {'Points': 5,
+                  'R':12,
+                  'Type':'Assault',
+                  'STR':4,
+                  'AP':0,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(con)':0,
+                  'A(rand)':6,
+                  'AB':'None'}
+Bright_Lance = {'Points': 10,
+                  'R':48,
+                  'Type':'Heavy',
+                  'STR':8,
+                  'AP':4,
+                  'D(rand)':3,
+                  'D(con)':3,
+                  'A(con)':1,
+                  'A(rand)':0,
+                  'AB':'None'}
 
+Corsair_Blaster = {'Points': 10,
+                  'R':18,
+                  'Type':'Assault',
+                  'STR':8,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':0,
+                  'A(con)':1,
+                  'A(rand)':0,
+                  'AB':'None'}
+
+D_Cannon = {'Points': 20,
+                  'R':24,
+                  'Type':'Heavy',
+                  'STR':12,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':2,
+                  'A(con)':0,
+                  'A(rand)':3,
+                  'AB':'None'}
+
+D_Scythe = {'Points': 10,
+                  'R':12,
+                  'Type':'Assault',
+                  'STR':10,
+                  'AP':4,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(con)':0,
+                  'A(rand)':6,
+                  'AB':['Blast','*']}
+Death_Spinner = {'Points': 0,
+                  'R':12,
+                  'Type':'Assault',
+                  'STR':6,
+                  'AP':2,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(con)':0,
+                  'A(rand)':6,
+                  'AB':'Blast'}
+Doomweaver = {'Points': 0,
+                  'R':48,
+                  'Type':'Heavy',
+                  'STR':7,
+                  'AP':2,
+                  'D(rand)':0,
+                  'D(con)':2,
+                  'A(con)':0,
+                  'A(rand)':12,
+                  'AB':'Blast'}
+Dragon_Fusion_Gun = {'Points': 0,
+                  'R':12,
+                  'Type':'Assault',
+                  'STR':9,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':2,
+                  'A(con)':1,
+                  'A(rand)':0,
+                  'AB':'None'}
 
 
 Eldar_Melee_Weapons = [Diresword,Power_Glaive]
-Eldar_Ranged_Weapons = [Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcannon,Avenger_Shuriken_Catapult,Shuriken_Pistol,Plasma_Grenade,Aeldari_Missle_Launcher]
+Eldar_Ranged_Weapons = [Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcannon,Avenger_Shuriken_Catapult,
+                        Shuriken_Pistol,Plasma_Grenade,Aeldari_Missle_Launcher,Dragon_Fusion_Gun,Bright_Lance,
+                        Doomweaver,Death_Spinner,D_Scythe,D_Cannon]
 
 #members
 Example_member = {'Points': 10,
@@ -358,9 +442,15 @@ def Weapon_Value(lst):
     #Want this function to evaluate ranged weapons (melee needs unit STR)
     #Take a list of weapons and gives back an array of doubles which gives
     #(average chance to wound spacemarine, average damage to spacemarine)
-    NA = np.array([])
+    NA = []
     for i in range(0,len(lst)):
-        NA = make_double(lst[i])
+        if type(lst[i]) == list:
+            for j in range(0,len(lst[i])):
+                x = make_double((lst[i])[j])
+                NA.append(x)
+        else:
+            x = make_double(lst[i])
+            NA.append(x)
     return NA
 
 def make_double(weap):
@@ -375,7 +465,6 @@ def make_double(weap):
 def Chance_To_Wound(weap):
     #give the chance to wound (after hitting) with the average number of attacks (if there's a random attack char.)
     T=4
-    W=2
     SV=4/6
     S = weap['STR']
     AP = weap['AP']
@@ -402,20 +491,8 @@ def Chance_To_Wound(weap):
         x = A*((4 / 6) * (1 - MSV))
     return x
 
-
 #print(Chance_To_Wound(Shuriken_Cannon))
 #print(Chance_To_Wound(Fusion_Pistol))
-#Sunburst = {'Points': 20,
-#                  'R':48,
-#                  'Type':'Heavy',
-#                  'STR':4,
-#                  'AP':1,
-#                  'D(rand)':0,
-#                  'D(con)':1,
-#                  'A(rand)': 6,
-#                  'A(con)': 0,
-#                  'AB':'Blast'}
-
 
 def Avg_Damage(weap):
     Dr = weap['D(rand)']
@@ -431,7 +508,7 @@ def Avg_Damage(weap):
         DR = 0
     else:
         DR = ((Dr / 2) + (Dr / 2) + 1) / 2
-    x = A*(Dc+DR)
+    x = (Dc+DR)
     return x
 
 #print(Avg_Damage(Fusion_Pistol))
@@ -439,7 +516,20 @@ def Avg_Damage(weap):
 
 
 print(Weapon_Value(Eldar_Ranged_Weapons))
+def plot_weapons(wlst):
+    #take a list of doubles and turn it into a graph
+    xval = []
+    yval = []
+    for i in range(0,len(wlst)):
+        xval.append(wlst[i][0])
+        yval.append(wlst[i][1])
+    plt.plot(xval,yval,'ro')
+    plt.axis([0,5,0,8])
+    plt.ylabel('average damage per wound')
+    plt.xlabel('average wounds vs Marine')
+    return plt.show()
 
+plot_weapons(Weapon_Value(Eldar_Ranged_Weapons))
 #This is the function for evaluating units in an army
 def army_list_value(army):
     #this function takes an army list and returns a list by highest point to cost ratio to the lowest
@@ -539,7 +629,6 @@ def sv_cost(val):
     x = val['SV']
     w = val['W']
     return x * w
-
 
 print(army_list_value(Eldar))
 
