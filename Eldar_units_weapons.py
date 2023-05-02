@@ -3,6 +3,66 @@ from main import *
 # (incomplete list)
 
 # Weapons
+Laser_Lance = {'Points': 0,
+                  'R':6,
+                  'Type':'Assault',
+                  'STR':6,
+                  'AP':4,
+                  'D(rand)':0,
+                  'D(con)':2,
+                  'A(con)':1,
+                  'A(rand)':0,
+                  'AB':'None'}
+Lasblaster = {'Points': 0,
+                  'R':24,
+                  'Type':'Assault',
+                  'STR':4,
+                  'AP':0,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(con)':4,
+                  'A(rand)':0,
+                  'AB':'None'}
+Heavy_Wraith_Cannon = {'Points': 30,
+                  'R':36,
+                  'Type':'Heavy',
+                  'STR':16,
+                  'AP':4,
+                  'D(rand)':3,
+                  'D(con)':6,
+                  'A(con)':0,
+                  'A(rand)':3,
+                  'AB':'None'}
+Heavy_Dscythe = {'Points': 0,
+                  'R':18,
+                  'Type':'Heavy',
+                  'STR':12,
+                  'AP':4,
+                  'D(rand)':0,
+                  'D(con)':2,
+                  'A(con)':0,
+                  'A(rand)':6,
+                  'AB':'None'}
+Hawks_Talon ={'Points': 0,
+                  'R':24,
+                  'Type':'Assault',
+                  'STR':5,
+                  'AP':1,
+                  'D(rand)':0,
+                  'D(con)':1,
+                  'A(con)':4,
+                  'A(rand)':0,
+                  'AB':'None'}
+Guardian_Fusion_Gun = {'Points': 10,
+                  'R':12,
+                  'Type':'Assault',
+                  'STR':8,
+                  'AP':4,
+                  'D(rand)':6,
+                  'D(con)':0,
+                  'A(con)':1,
+                  'A(rand)':0,
+                  'AB':'None'}
 GGCrush = {'Points': 15,
                   'Type':'Melee',
                   '*/+':'+',
@@ -174,7 +234,7 @@ Shuriken_Cannon = {'Points': 10,
                   'A(con)':3,
                   'A(rand)':0,
                   'AB':'Shuriken'}
-Wraithcannon = {'Points': 15,
+Wraithcannon = {'Points': 0,
                   'R':18,
                   'Type':'Assualt',
                   'STR':10,
@@ -344,7 +404,7 @@ StarShotReaper = {'Points': 0,
                   'A(con)':1,
                   'A(rand)':0,
                   'AB':'None'}
-Reaper_Launcher = [StarShotReaper,]
+Reaper_Launcher = [StarShotReaper,StarSwarm]
 Corsair_Shredder = {'Points': 5,
                   'R':18,
                   'Type':'Assualt',
@@ -421,7 +481,8 @@ Eldar_Ranged_Weapons = [Fusion_Pistol,Shuriken_Cannon,Shuriken_Rifle,Wraithcanno
                         Shuriken_Pistol,Plasma_Grenade,Aeldari_Missle_Launcher,Dragon_Fusion_Gun,Bright_Lance,
                         Doomweaver,Death_Spinner,D_Scythe,D_Cannon,Dragon_Breath_Flamer,Fire_pike,
                         Flamer,Fury_of_the_Tempest,Shuriken_Catapult,Scatter_Laser,Star_Cannon,Ranger_Long_Rifle,
-                        Neuro_Disrupter,Corsair_Shredder,Reaper_Launcher]
+                        Neuro_Disrupter,Corsair_Shredder,Reaper_Launcher,Lasblaster,Laser_Lance,Hawks_Talon,
+                        Guardian_Fusion_Gun,Heavy_Dscythe,Heavy_Wraith_Cannon]
 
 # Members
 wraithlord = {'Points': 100,

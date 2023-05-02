@@ -2,8 +2,9 @@
 # ranks units by their stat/cost ratio with a weight given by some calculated values
 import numpy as np
 import matplotlib.pyplot as plt
-# Todo: Make a regression line of the average weapon visible for the weapon graph
-#       Add more weapons and units to the Eldar_units_weapons file
+import scipy.linalg as la
+from scipy import interpolate as int
+# Todo: Add more weapons and units to the Eldar_units_weapons file
 #       Improve the move, save, leadership, and toughness functions
 #       Order the units in some way (ie by highest average score or highest score)
 #       Add a way to compare the to wound of different units:
@@ -83,17 +84,41 @@ def Avg_Damage(weap):
 
 def Plot_Weapons(wlst):
     # take a list of weapons and turn it into a graph (want to call Weapon_Value)
-    dlst = Weapon_Value(wlst)
+    # want to sort dlist by x values
+    step = 100
+    dlst = sorted(Weapon_Value(wlst))
     xval = []
     yval = []
     for i in range(0,len(wlst)):
         xval.append(dlst[i][0])
         yval.append(dlst[i][1])
-    plt.plot(xval,yval,'ro')
-    plt.axis([0,5,0,8])
+    n = len(xval)
+    x = np.array(xval)
+    y = np.array(yval)
+    xmax = max(xval) + 1
+    ymax = max(yval) + 1
+    X = np.column_stack([np.ones(n),x,x**2,x**3,x**4,x**5])
+    x_rline = np.linspace(0, xmax, step)
+    coeff = la.solve((X.T @ X),X.T @ yval)
+    y_rline = coeff[0] +coeff[1]*x_rline + coeff[2]*x_rline**2 + coeff[3]* x_rline**3 + coeff[4]* x_rline**4 +\
+              coeff[5]* x_rline**5
+    plt.scatter(xval,yval)
+    plt.plot(x_rline,y_rline,'r')
+    plt.axis([0,xmax,0,ymax])
     plt.ylabel('average damage per wound')
     plt.xlabel('average wounds vs Marine')
     return plt.show()
+
+def Sort_Average(lst):
+    #list is a list of doubles which we want to average out the y values for equal xs
+    slst = sorted(lst)
+    avg_lst = []
+    for i in range(1,len(lst)):
+        if slst[i][0] == slst[i-1][0]:
+            avg_lst.append((slst[i-1][0],(slst[i][1]+slst[i-1][1])/2))
+        else:
+            avg_lst.append(slst[i])
+    return None
 
 def Army_List_Value(army):
     # this function takes an army list and returns a list by highest point to cost ratio to the lowest
@@ -248,3 +273,4 @@ def SV_Cost(val):
     x = val['SV']
     w = val['W']
     return x * w
+
