@@ -89,7 +89,7 @@ def Plot_Weapons(wlst):
     dlst = sorted(Weapon_Value(wlst))
     xval = []
     yval = []
-    for i in range(0,len(wlst)):
+    for i in range(0,len(dlst)):
         xval.append(dlst[i][0])
         yval.append(dlst[i][1])
     n = len(xval)
