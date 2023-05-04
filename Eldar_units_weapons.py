@@ -2,6 +2,10 @@ from main import *
 # This file contains the units and weapons from the Aeldari faction on Wahapedia.ru
 # (incomplete list)
 
+# a member is a part of the unit and is dictionary of stats
+# a unit is a dictionary of a name and a list of members
+
+
 # Weapons
 Laser_Lance = {'Points': 0,
                   'R':6,
@@ -633,5 +637,5 @@ Dire_Avengers = {'Name': 'Dire_Avengers',
 Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred,Dire_Avengers]
 
 
-Plot_Weapons(Eldar_Ranged_Weapons)
+Plot_Weapons(Eldar_Ranged_Weapons,wraithlord)
 print(Army_List_Value(Eldar))
