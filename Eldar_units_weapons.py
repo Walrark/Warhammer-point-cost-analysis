@@ -638,4 +638,4 @@ Eldar = [WraithLord,Guardian_Defenders,Autarch,Corsair_Voidscarred,Dire_Avengers
 
 
 Plot_Weapons(Eldar_Ranged_Weapons,wraithlord)
-print(Army_List_Value(Eldar))
+print(Army_List_Value(Eldar,wraithlord))

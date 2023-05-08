@@ -137,11 +137,11 @@ def Plot_Weapons(wlst, test_unit = Spacemarine):
     plt.xlabel('average wounds vs {}'.format('unit'))
     return plt.show()
 
-def Army_List_Value(army):
+def Army_List_Value(army, test_unit = Spacemarine):
     # this function takes an army list and returns a list by highest point to cost ratio to the lowest
     z = np.zeros((len(army),5))
     for i in range(0,len(army)):
-       z[i] = Unit_Handle(army[i])
+       z[i] = Unit_Handle(army[i],test_unit)
     return np.block([List_Array_Transpose(army),z])
 
 def List_Array_Transpose(army):
@@ -151,18 +151,18 @@ def List_Array_Transpose(army):
         new_list.append('{}'.format(army[i]['Name']))
     return np.array([new_list]).T
 
-def Unit_Handle(unit):
+def Unit_Handle(unit, test_unit = Spacemarine):
     # this function take the unit given from the army and returns a list of the point to cost ratio of each member
     z = np.zeros(5)
     for i in range(0,len(unit['Member'])):
-        z[i] = Member_Value(unit['Member'][i])
+        z[i] = Member_Value(unit['Member'][i], test_unit)
     return z
 
-def Member_Value(member):
+def Member_Value(member, test_unit = Spacemarine):
     # This function adds the values of each stat and divides by the cost
     x = ((M_Cost(member)
-    + Melee(member)
-    + BS_Cost(member)
+    + Melee(member, test_unit)
+    + BS_Cost(member, test_unit)
     + T_Cost(member)
     + W_Cost(member)
     + LD_Cost(member)
@@ -176,13 +176,15 @@ def M_Cost(memb):
     w = (memb['T']*memb['W'])+(6*memb['WS']+memb['A']+memb['STR'])/3
     return (w + x)/2
 
-def BS_Cost(memb):
-    # given a member's bs and weapons returns average wounds vs spacemarine with best weapon
+def BS_Cost(memb, test_unit = Spacemarine):
+    # given a member's bs and weapons returns average wounds vs spacemarine with the best weapon
+    # would be ideal to have the choices for weapons to be an option
+    # as in if a unit can use multiple guns in a turn
     mem_bs = memb['BS']
     weap_list = memb['Weap']
     results = []
     for i in range(0,len(weap_list)):
-        weap_vals = Weapon_Value(weap_list)
+        weap_vals = Weapon_Value(weap_list, test_unit)
     for j in range(0,len(weap_vals)):
         if weap_vals[j] == None:
             x=0
@@ -192,21 +194,21 @@ def BS_Cost(memb):
             results.append(x)
     return max(results)
 
-def Melee(memb):
+def Melee(memb, test_unit = Spacemarine):
     # given a str value returns a weighted value
     weap_list = memb['Weap']
     result =[]
     for i in range(0,len(weap_list)):
         if type(weap_list[i]) == list:
             for j in range(0,len(weap_list[i])):
-               x = Melee_Wound((weap_list[i])[j],memb)
+               x = Melee_Wound((weap_list[i])[j],memb, test_unit)
                result.append(x)
         else:
-            x = Melee_Wound(weap_list[i],memb)
+            x = Melee_Wound(weap_list[i],memb,test_unit)
             result.append(x)
     return max(result)
 
-def Melee_Wound(weapon,mem):
+def Melee_Wound(weapon, mem, test_unit = Spacemarine):
     Unarmed = {'Points': 0,
                'Type': 'Melee',
                '*/+': '+',
@@ -232,8 +234,8 @@ def Melee_Wound(weapon,mem):
     Am = mem['A']
     Dr = weap['D(rand)']
     Dc = weap['D(con)']
-    T = 4
-    SV = 4/6
+    T = test_unit['T']
+    SV = test_unit['SV']
     if Ar == 0:
         AR = 0
     else:
